@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnOpenCvTest.setOnClickListener {
-            startActivity(Intent(this, ContourPolyActivity::class.java))
+            startActivity(Intent(this, ShapeDetectActivity::class.java))
         }
     }
 }
