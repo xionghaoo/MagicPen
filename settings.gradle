@@ -1,0 +1,2 @@
+rootProject.name = "MagicPen"
+include ':app', ':opencv_sdk_452'
