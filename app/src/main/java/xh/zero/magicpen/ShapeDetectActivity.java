@@ -77,14 +77,20 @@ public class ShapeDetectActivity extends AppCompatActivity {
                 hsvMat = new Mat();
                 Imgproc.cvtColor(srcMat, hsvMat, Imgproc.COLOR_BGR2HSV);
                 Core.inRange(hsvMat, new Scalar(156, 43, 46), new Scalar(180, 255, 255), binaryMat);
+                // 生成二值化图片
                 resultBitmap = Bitmap.createBitmap(hsvMat.width(), hsvMat.height(), Bitmap.Config.ARGB_8888);
+                // 找到轮廓，并存入contours
                 Imgproc.findContours(binaryMat, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+                // 将contours轮廓在resultMat(srcMat)上用粗细为10的黑色线条画出
                 Imgproc.drawContours(resultMat, contours, -1, new Scalar(0, 0, 0), 10);
+                // 对轮廓进行多边形拟合
                 double epsilon;
                 contours2f = new MatOfPoint2f(contours.get(0).toArray());
                 epsilon = 0.04 * Imgproc.arcLength(contours2f, true);
                 approxCurve = new MatOfPoint2f();
+                // 拟合后的顶点集合approxCurve
                 Imgproc.approxPolyDP(contours2f, approxCurve, epsilon, true);
+                // 通过拟合后的顶点数判断形状
                 if (approxCurve.rows() == 3) {
                     tri++;
                 }

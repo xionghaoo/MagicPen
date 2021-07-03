@@ -7,4 +7,8 @@ class MagicPenApp : Application() {
         System.loadLibrary("opencv_java4")
         System.loadLibrary("native_lib")
     }
+
+    override fun onCreate() {
+        super.onCreate()
+    }
 }
