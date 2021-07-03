@@ -13,6 +13,3 @@
 .externalNativeBuild
 .cxx
 local.properties
-/opencv_sdk_452/build/.transforms/a185f6b5a2ec232dfde86d065a654073.bin
-/opencv_sdk_452/build/.transforms/a185f6b5a2ec232dfde86d065a654073/classes/classes.dex
-/opencv_sdk_452/build/intermediates/runtime_library_classes_jar/debug/classes.jar
