@@ -41,7 +41,8 @@ class MainActivity : AppCompatActivity() {
         openCVInit()
 
         binding.btnOpenCvTest.setOnClickListener {
-            startActivity(Intent(this, ShapeDetectActivity::class.java))
+//            startActivity(Intent(this, ShapeDetectActivity::class.java))
+            startActivity(Intent(this, TensorflowTestActivity::class.java))
         }
 
         binding.drawView.setOnDrawListener(object : DrawView.OnDrawListener {
@@ -70,13 +71,6 @@ class MainActivity : AppCompatActivity() {
         if (image == null) return
         srcMat = Mat()
         try {
-
-//            val shape: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.contourpoly)
-//            val bmp32: Bitmap = shape.copy(Bitmap.Config.ARGB_8888, true)
-//            Utils.bitmapToMat(shape, srcMat)
-//            srcMat = Utils.loadResource(this, R.drawable.contourpoly)
-
-//            srcMat = Mat(image.height, image.width, CvType.CV_8UC4)
             Utils.bitmapToMat(image, srcMat)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -109,12 +103,12 @@ class MainActivity : AppCompatActivity() {
             Imgproc.CHAIN_APPROX_SIMPLE
         )
         // 将contours轮廓在resultMat(srcMat)上用粗细为10的黑色线条画出
-        Imgproc.drawContours(resultMat, contours, -1, Scalar(0.0, 0.0, 0.0), 10)
+//        Imgproc.drawContours(resultMat, contours, -1, Scalar(0.0, 0.0, 0.0), 10)
         if (contours.isNotEmpty()) {
             // 对轮廓进行多边形拟合
             contours2f = MatOfPoint2f(*contours[0].toArray())
             // 近似精度的参数，值越小精度越高
-            val epsilon = 0.01 * Imgproc.arcLength(contours2f, true)
+            val epsilon = 0.03 * Imgproc.arcLength(contours2f, true)
             Log.d(TAG, "epsilon: ${epsilon}")
             approxCurve = MatOfPoint2f()
             // 拟合后的顶点集合approxCurve
