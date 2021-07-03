@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.image.TensorImage
@@ -13,6 +15,7 @@ import org.tensorflow.lite.support.model.Model
 import xh.zero.magicpen.ml.FlowerModel
 import java.io.FileInputStream
 import java.io.IOException
+import java.lang.StringBuilder
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
@@ -34,10 +37,6 @@ class TensorflowTestActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     private fun test() {
         Thread {
             val bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_flower_rose)
@@ -55,6 +54,14 @@ class TensorflowTestActivity : AppCompatActivity() {
                 val recognition = Recognition(output.label, output.score)
                 items.add(recognition)
                 Log.d(TAG, "out: ${recognition.label} ---- ${recognition.probabilityString}")
+            }
+            runOnUiThread {
+                val tvResult = findViewById<TextView>(R.id.tv_recognize_result)
+                val txt = StringBuilder()
+                items.forEach { item ->
+                    txt.append("识别结果: ${item.label} 的可能性为 ${item.probabilityString}").append("\n")
+                }
+                tvResult.text = txt.toString()
             }
         }.start()
     }
