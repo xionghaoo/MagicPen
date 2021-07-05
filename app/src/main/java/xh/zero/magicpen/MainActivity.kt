@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
                 handlePath(bitmap)
             }
         })
+
+        binding.drawViewFixed.setOnTouchListener { v, event -> true }
     }
 
     private fun loadBitmapFromView(v: View): Bitmap? {
@@ -120,17 +122,22 @@ class MainActivity : AppCompatActivity() {
 //            binding.drawViewBak.setImageBitmap(resultBitmap)
 
             Log.d(TAG, "顶点数：${approxCurve.rows()}")
-
-            val path = Path()
-            approxCurve.toList().forEachIndexed { index, point ->
-                if (index == 0) {
-                    path.moveTo(point.x.toFloat(), point.y.toFloat())
-                } else {
-                    path.lineTo(point.x.toFloat(), point.y.toFloat())
+            val num = approxCurve.rows()
+            if (num <= 5 || num == 10) {
+                val path = Path()
+                approxCurve.toList().forEachIndexed { index, point ->
+                    if (index == 0) {
+                        path.moveTo(point.x.toFloat(), point.y.toFloat())
+                    } else {
+                        path.lineTo(point.x.toFloat(), point.y.toFloat())
+                    }
                 }
+                path.close()
+                binding.drawViewFixed.setPath(path)
+            } else {
+                binding.drawViewFixed.setCircle()
             }
-            path.close()
-            binding.drawViewFixed.setPath(path)
+
 
         }
 

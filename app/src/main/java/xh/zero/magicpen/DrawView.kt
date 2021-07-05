@@ -5,6 +5,8 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.max
+import kotlin.math.min
 
 class DrawView : View {
 
@@ -20,7 +22,8 @@ class DrawView : View {
     lateinit var path: Path
         private set
 
-    private var isTouchDraw = false
+    private var isTouchDraw = true
+    private var isDrawCircle = false
 
     private val points = ArrayList<PointF>()
 
@@ -113,7 +116,12 @@ class DrawView : View {
         if (isTouchDraw) {
             canvas.drawPath(path, paint)
         } else {
-            canvas.drawPath(path, manualPaint)
+            if (isDrawCircle) {
+                drawCircle(canvas)
+                isDrawCircle = false
+            } else {
+                canvas.drawPath(path, manualPaint)
+            }
         }
     }
 
@@ -125,6 +133,19 @@ class DrawView : View {
         this.path = path
         isTouchDraw = false
         invalidate()
+    }
+
+    fun setCircle() {
+        isTouchDraw = false
+        isDrawCircle = true
+        invalidate()
+    }
+
+    private fun drawCircle(canvas: Canvas) {
+        val width = (width - paddingLeft - paddingRight).toFloat()
+        val height = (height - paddingTop - paddingBottom).toFloat()
+        val radius = min(width, height) / 4
+        canvas.drawCircle(width/2, height/2, radius, manualPaint)
     }
 
     interface OnDrawListener {
