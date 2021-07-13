@@ -8,6 +8,7 @@ import android.graphics.Path
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
@@ -110,7 +111,10 @@ class MainActivity : AppCompatActivity() {
             // 对轮廓进行多边形拟合
             contours2f = MatOfPoint2f(*contours[0].toArray())
             // 近似精度的参数，值越小精度越高
-            val epsilon = 0.03 * Imgproc.arcLength(contours2f, true)
+            var epsilon = 0.03 * Imgproc.arcLength(contours2f, true)
+            if (epsilon <= 5) {
+                epsilon = 5.0
+            }
             Log.d(TAG, "epsilon: ${epsilon}")
             approxCurve = MatOfPoint2f()
             // 拟合后的顶点集合approxCurve
@@ -121,9 +125,17 @@ class MainActivity : AppCompatActivity() {
 //            Utils.matToBitmap(resultMat, resultBitmap)
 //            binding.drawViewBak.setImageBitmap(resultBitmap)
 
-            Log.d(TAG, "顶点数：${approxCurve.rows()}")
+            Log.d(TAG, "顶点数：${approxCurve.rows()}, ${contours}")
             val num = approxCurve.rows()
-            if (num <= 5 || num == 10) {
+            if (num == 0) {
+                Toast.makeText(this, "识别失败", Toast.LENGTH_SHORT).show()
+                binding.drawViewFixed.clear()
+                return
+            }
+            if (num == 2 || num == 1) {
+                // 绘制箭头
+                binding.drawViewFixed.drawArrow(binding.drawView.getTouchDirection())
+            } else if (num <= 5 || num == 10) {
                 val path = Path()
                 approxCurve.toList().forEachIndexed { index, point ->
                     if (index == 0) {
@@ -135,6 +147,7 @@ class MainActivity : AppCompatActivity() {
                 path.close()
                 binding.drawViewFixed.setPath(path)
             } else {
+                // 画圆
                 binding.drawViewFixed.setCircle()
             }
 
