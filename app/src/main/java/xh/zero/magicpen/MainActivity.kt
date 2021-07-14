@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
 //            Utils.matToBitmap(resultMat, resultBitmap)
 //            binding.drawViewBak.setImageBitmap(resultBitmap)
 
-            Log.d(TAG, "顶点数：${approxCurve.rows()}, ${contours}")
+            Log.d(TAG, "顶点数：${approxCurve.rows()}")
             val num = approxCurve.rows()
             if (num == 0) {
                 Toast.makeText(this, "识别失败", Toast.LENGTH_SHORT).show()
@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
             if (num == 2 || num == 1) {
                 // 绘制箭头
                 binding.drawViewFixed.drawArrow(binding.drawView.getTouchDirection())
-            } else if (num <= 5 || num == 10) {
+            } else if (num <= 4 || num == 10) {
                 val path = Path()
                 approxCurve.toList().forEachIndexed { index, point ->
                     if (index == 0) {
