@@ -14,6 +14,7 @@ import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
+import xh.zero.magicpen.ble.BleBluetoothActivity
 import xh.zero.magicpen.databinding.ActivityMainBinding
 import java.io.IOException
 import java.util.*
@@ -43,7 +44,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnOpenCvTest.setOnClickListener {
 //            startActivity(Intent(this, ShapeDetectActivity::class.java))
-            startActivity(Intent(this, TensorflowTestActivity::class.java))
+//            startActivity(Intent(this, TensorflowTestActivity::class.java))
+            startActivity(Intent(this, BleBluetoothActivity::class.java))
         }
 
         binding.drawView.setOnDrawListener(object : DrawView.OnDrawListener {

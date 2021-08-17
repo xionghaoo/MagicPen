@@ -66,4 +66,6 @@ dependencies {
     implementation project(":opencv_sdk_452")
     implementation "org.tensorflow:tensorflow-lite-support:0.1.0"
     implementation "org.tensorflow:tensorflow-lite-metadata:0.1.0"
+
+    implementation "pub.devrel:easypermissions:3.0.0"
 }
