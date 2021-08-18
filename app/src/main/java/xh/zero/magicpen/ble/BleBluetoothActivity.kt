@@ -1,10 +1,8 @@
 package xh.zero.magicpen.ble
 
 import android.Manifest
-import android.app.Service
 import android.bluetooth.*
 import android.bluetooth.BluetoothDevice.TRANSPORT_LE
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,12 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import xh.zero.magicpen.Configs
-import xh.zero.magicpen.R
 import xh.zero.magicpen.ToastUtil
 import xh.zero.magicpen.databinding.ActivityBleBluetoothBinding
+import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import kotlin.experimental.and
 
 class BleBluetoothActivity : AppCompatActivity() {
 
@@ -116,6 +114,43 @@ class BleBluetoothActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // Characteristic notification
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            val result = bytesToHex(characteristic.value)
+            Log.d(TAG, "特征值: ${result}")
+            when(result) {
+                Configs.NOTIFY_ONCE_CLICK -> {
+                    Log.d(TAG, "单次点击")
+                }
+                Configs.NOTIFY_DOUBLE_CLICK -> {
+                    Log.d(TAG, "双击")
+                }
+                Configs.NOTIFY_GESTURE_DOWN -> {
+                    Log.d(TAG, "向下")
+                }
+                Configs.NOTIFY_GESTURE_UP -> {
+                    Log.d(TAG, "向上")
+                }
+                Configs.NOTIFY_GESTURE_LEFT -> {
+                    Log.d(TAG, "向左")
+                }
+                Configs.NOTIFY_GESTURE_RIGHT -> {
+                    Log.d(TAG, "向右")
+                }
+                Configs.NOTIFY_GESTURE_CLOCKWISE -> {
+                    Log.d(TAG, "顺时针")
+                }
+                Configs.NOTIFY_GESTURE_ANTICLOCKWISE -> {
+                    Log.d(TAG, "逆时针")
+                }
+            }
+
+//            broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,7 +174,7 @@ class BleBluetoothActivity : AppCompatActivity() {
         binding.rcDevices.layoutManager = LinearLayoutManager(this)
         bleDeviceAdapter = BleDeviceAdapter(ArrayList()) { device ->
             Log.d(TAG, "开始连接设备")
-            bluetoothGatt = device.connectGatt(this, true, gattCallback, TRANSPORT_LE)
+            bluetoothGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
             scanLeDevice(false)
         }
         binding.rcDevices.adapter = bleDeviceAdapter
@@ -151,6 +186,13 @@ class BleBluetoothActivity : AppCompatActivity() {
 
         binding.btnClose.setOnClickListener {
             close()
+        }
+
+        binding.btnGestureMode.setOnClickListener {
+            enterGestureMode()
+        }
+        binding.btnGestureNotify.setOnClickListener {
+            enableNotify()
         }
     }
 
@@ -197,6 +239,59 @@ class BleBluetoothActivity : AppCompatActivity() {
                 bluetoothAdapter?.stopLeScan(leScanCallback)
             }
         }
+    }
+
+    private fun enterGestureMode() {
+        val characteristicWrite = bluetoothGatt?.getService(Configs.SERVICE_GESTURE)?.getCharacteristic(Configs.CHARACTERISTIC_WRITE_CMD)
+        if (characteristicWrite != null) {
+//            val value = byteArrayOf(0xaa553300.toByte())
+            val value = hexStringToByteArray("aa553300")
+            Log.d(TAG, "write bytes: $value")
+            characteristicWrite.value = value
+            val status = bluetoothGatt?.writeCharacteristic(characteristicWrite)
+            Log.d(TAG, "写入状态: $status")
+        }
+
+    }
+
+    private fun enableNotify() {
+        val characteristicNotify = bluetoothGatt?.getService(Configs.SERVICE_GESTURE)?.getCharacteristic(Configs.CHARACTERISTIC_PEN_NOTIFY)
+        if (characteristicNotify != null) {
+            for (descriptor in characteristicNotify.getDescriptors()) {
+                Log.d(TAG, "BluetoothGattDescriptor: " + descriptor.uuid.toString())
+            }
+
+            bluetoothGatt?.setCharacteristicNotification(characteristicNotify, true)
+            val descriptor = characteristicNotify.getDescriptor(Configs.CHARACTERISTIC_UPDATE_NOTIFICATION_DESCRIPTOR_UUID).apply {
+                value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+            }
+            val status = bluetoothGatt?.writeDescriptor(descriptor)
+            Log.d(TAG, "写入状态: $status")
+        }
+    }
+
+    private fun hexStringToByteArray(s: String): ByteArray? {
+        val len = s.length
+        val data = ByteArray(len / 2)
+        var i = 0
+        while (i < len) {
+            data[i / 2] = ((Character.digit(s[i], 16) shl 4)
+                + Character.digit(s[i + 1], 16)).toByte()
+            i += 2
+        }
+        return data
+    }
+
+    fun bytesToHex(bytes: ByteArray): String? {
+        val result = CharArray(bytes.size * 2)
+        for (index in bytes.indices) {
+            val v = bytes[index].toInt()
+            val upper = v ushr 4 and 0xF
+            result[index * 2] = (upper + if (upper < 10) 48 else 65 - 10).toChar()
+            val lower = v and 0xF
+            result[index * 2 + 1] = (lower + if (lower < 10) 48 else 65 - 10).toChar()
+        }
+        return String(result)
     }
 
     private fun broadcastUpdate(action: String) {

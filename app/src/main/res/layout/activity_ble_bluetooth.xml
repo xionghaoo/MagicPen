@@ -9,7 +9,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rc_devices"
         android:layout_width="0dp"
-        android:layout_height="400dp"
+        android:layout_height="200dp"
         android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,4 +34,25 @@
         app:layout_constraintBottom_toBottomOf="@+id/btn_scan"
         app:layout_constraintStart_toEndOf="@+id/btn_scan"
         app:layout_constraintTop_toTopOf="@+id/btn_scan" />
+
+    <Button
+        android:id="@+id/btn_gesture_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="手势模式"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rc_devices" />
+
+    <Button
+        android:id="@+id/btn_gesture_notify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开启手势通知"
+        android:layout_marginStart="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_gesture_mode"
+        app:layout_constraintStart_toEndOf="@+id/btn_gesture_mode"
+        app:layout_constraintTop_toTopOf="@+id/btn_gesture_mode" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
