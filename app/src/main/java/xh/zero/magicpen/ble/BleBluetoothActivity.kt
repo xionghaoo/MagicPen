@@ -10,10 +10,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import xh.zero.magicpen.Configs
+import xh.zero.magicpen.DrawView
 import xh.zero.magicpen.ToastUtil
 import xh.zero.magicpen.databinding.ActivityBleBluetoothBinding
 import java.nio.charset.StandardCharsets
@@ -54,6 +57,8 @@ class BleBluetoothActivity : AppCompatActivity() {
         runOnUiThread {
             // 扫描结果
             if (device.address == Configs.DEVICE_MAC_ADDRESS) {
+                binding.tvStatus.text = "状态：发现设备 ${device.address}"
+
                 bleDeviceAdapter.addDevice(device)
             }
         }
@@ -73,21 +78,36 @@ class BleBluetoothActivity : AppCompatActivity() {
                 BluetoothProfile.STATE_CONNECTED -> {
                     intentAction = ACTION_GATT_CONNECTED
 //                    connectionState = STATE_CONNECTED
-                    broadcastUpdate(intentAction)
+//                    broadcastUpdate(intentAction)
                     Log.i(TAG, "Connected to GATT server.")
                     Log.i(TAG, "Attempting to start service discovery: " + bluetoothGatt?.discoverServices())
+                    runOnUiThread {
+                        binding.tvStatus.text = "状态：已连接到GATT服务器，开启服务发现"
+                    }
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     intentAction = ACTION_GATT_DISCONNECTED
 //                    connectionState = STATE_DISCONNECTED
                     Log.i(TAG, "Disconnected from GATT server.")
-                    broadcastUpdate(intentAction)
+//                    broadcastUpdate(intentAction)
+
+                    runOnUiThread {
+                        AlertDialog.Builder(this@BleBluetoothActivity)
+                            .setTitle("设备已断开连接！")
+                            .show()
+                        binding.tvStatus.text = "状态：GATT服务器连接已断开"
+                        close()
+                    }
+
                 }
             }
         }
 
         // New services discovered
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            runOnUiThread {
+                binding.tvStatus.text = "状态：已连接, 发现服务列表"
+            }
 
             Log.d(TAG, "onServicesDiscovered: ${gatt.services.size}, ${status}")
             gatt.services.forEach { service ->
@@ -120,32 +140,65 @@ class BleBluetoothActivity : AppCompatActivity() {
             gatt: BluetoothGatt,
             characteristic: BluetoothGattCharacteristic
         ) {
+            runOnUiThread {
+                binding.tvStatus.text = "状态：特征值变化"
+            }
+
             val result = bytesToHex(characteristic.value)
             Log.d(TAG, "特征值: ${result}")
             when(result) {
                 Configs.NOTIFY_ONCE_CLICK -> {
                     Log.d(TAG, "单次点击")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：单次点击"   
+                    }
                 }
                 Configs.NOTIFY_DOUBLE_CLICK -> {
                     Log.d(TAG, "双击")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：双击"   
+                    }
                 }
                 Configs.NOTIFY_GESTURE_DOWN -> {
                     Log.d(TAG, "向下")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：向下"   
+                    }
+                    binding.vDrawResult.drawArrow(DrawView.ArrowDirection.BOTTOM)
                 }
                 Configs.NOTIFY_GESTURE_UP -> {
                     Log.d(TAG, "向上")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：向上"
+                        binding.vDrawResult.drawArrow(DrawView.ArrowDirection.TOP)   
+                    }
                 }
                 Configs.NOTIFY_GESTURE_LEFT -> {
                     Log.d(TAG, "向左")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：向左"
+                        binding.vDrawResult.drawArrow(DrawView.ArrowDirection.LEFT)   
+                    }
                 }
                 Configs.NOTIFY_GESTURE_RIGHT -> {
                     Log.d(TAG, "向右")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：向右"
+                        binding.vDrawResult.drawArrow(DrawView.ArrowDirection.RIGHT)   
+                    }
                 }
                 Configs.NOTIFY_GESTURE_CLOCKWISE -> {
                     Log.d(TAG, "顺时针")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：顺时针"   
+                    }
                 }
                 Configs.NOTIFY_GESTURE_ANTICLOCKWISE -> {
                     Log.d(TAG, "逆时针")
+                    runOnUiThread {
+                        binding.tvResult.text = "识别结果：逆时针"   
+                    }
+
                 }
             }
 
@@ -174,12 +227,13 @@ class BleBluetoothActivity : AppCompatActivity() {
         binding.rcDevices.layoutManager = LinearLayoutManager(this)
         bleDeviceAdapter = BleDeviceAdapter(ArrayList()) { device ->
             Log.d(TAG, "开始连接设备")
+            binding.tvStatus.text = "状态：正在连接设备。。。"
             bluetoothGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
             scanLeDevice(false)
         }
         binding.rcDevices.adapter = bleDeviceAdapter
 
-
+        binding.btnScan.text = "开始扫描"
         binding.btnScan.setOnClickListener {
             scanTask()
         }
@@ -194,6 +248,8 @@ class BleBluetoothActivity : AppCompatActivity() {
         binding.btnGestureNotify.setOnClickListener {
             enableNotify()
         }
+
+        binding.vDrawResult.setOnTouchListener { v, event -> true }
     }
 
     override fun onRequestPermissionsResult(
@@ -208,7 +264,7 @@ class BleBluetoothActivity : AppCompatActivity() {
     @AfterPermissionGranted(RC_PERMISSION_LOCATION)
     fun scanTask() {
         if (hasLocationPermission()) {
-            scanLeDevice(true)
+            scanLeDevice(!mScanning)
         } else {
             EasyPermissions.requestPermissions(
                 this,
@@ -226,16 +282,19 @@ class BleBluetoothActivity : AppCompatActivity() {
     private fun scanLeDevice(enable: Boolean) {
         when (enable) {
             true -> {
+                binding.tvStatus.text = "状态：开始设备扫描。。。"
                 // Stops scanning after a pre-defined scan period.
                 handler.postDelayed({
                     mScanning = false
                     bluetoothAdapter?.stopLeScan(leScanCallback)
                 }, SCAN_PERIOD)
                 mScanning = true
+                binding.btnScan.text = "停止扫描"
                 bluetoothAdapter?.startLeScan(leScanCallback)
             }
             else -> {
                 mScanning = false
+                binding.btnScan.text = "开始扫描"
                 bluetoothAdapter?.stopLeScan(leScanCallback)
             }
         }
@@ -250,6 +309,7 @@ class BleBluetoothActivity : AppCompatActivity() {
             characteristicWrite.value = value
             val status = bluetoothGatt?.writeCharacteristic(characteristicWrite)
             Log.d(TAG, "写入状态: $status")
+            binding.tvGestureMode.text = "手势模式: ${if (status == true) "已开启" else "已关闭"}"
         }
 
     }
@@ -267,6 +327,7 @@ class BleBluetoothActivity : AppCompatActivity() {
             }
             val status = bluetoothGatt?.writeDescriptor(descriptor)
             Log.d(TAG, "写入状态: $status")
+            binding.tvGestureNotify.text = "手势通知: ${if (status == true) "已开启" else "已关闭"}"
         }
     }
 
@@ -341,8 +402,13 @@ class BleBluetoothActivity : AppCompatActivity() {
     }
 
     fun close() {
+        scanLeDevice(false)
+        bleDeviceAdapter.items.clear()
+        bleDeviceAdapter.notifyDataSetChanged()
         bluetoothGatt?.close()
         bluetoothGatt = null
+        binding.tvGestureMode.text = "手势模式：已关闭"
+        binding.tvGestureNotify.text = "手势通知：已关闭"
     }
 
 }

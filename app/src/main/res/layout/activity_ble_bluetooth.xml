@@ -9,9 +9,13 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rc_devices"
         android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="100dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:paddingEnd="15dp"
+        android:background="@drawable/shape_draw_bg"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_scan" />
 
@@ -19,29 +23,27 @@
         android:id="@+id/btn_scan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         android:text="扫描设备"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/tv_result" />
 
     <Button
         android:id="@+id/btn_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="关闭设备"
-        android:layout_marginStart="20dp"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_scan"
-        app:layout_constraintStart_toEndOf="@+id/btn_scan"
-        app:layout_constraintTop_toTopOf="@+id/btn_scan" />
+        app:layout_constraintStart_toStartOf="@+id/btn_gesture_notify"
+        app:layout_constraintTop_toBottomOf="@+id/btn_gesture_notify" />
 
     <Button
         android:id="@+id/btn_gesture_mode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="手势模式"
-        android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:text="手势模式"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rc_devices" />
 
@@ -50,9 +52,84 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="开启手势通知"
-        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="@+id/btn_gesture_mode"
+        app:layout_constraintTop_toBottomOf="@+id/btn_gesture_mode" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="魔法笔测试页面"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <xh.zero.magicpen.DrawView
+        android:id="@+id/v_draw_result"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/shape_draw_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
+        app:layout_constraintTop_toBottomOf="@+id/tv_result" />
+
+    <TextView
+        android:id="@+id/tv_gesture_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:text="手势模式: 关闭"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/btn_gesture_mode"
         app:layout_constraintStart_toEndOf="@+id/btn_gesture_mode"
         app:layout_constraintTop_toTopOf="@+id/btn_gesture_mode" />
+
+    <TextView
+        android:id="@+id/tv_gesture_notify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="手势通知: 关闭"
+        android:layout_marginStart="15dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_gesture_notify"
+        app:layout_constraintStart_toEndOf="@+id/btn_gesture_notify"
+        app:layout_constraintTop_toTopOf="@+id/btn_gesture_notify" />
+
+    <TextView
+        android:id="@+id/tv_result"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="15dp"
+        android:text="识别结果"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:text="连接状态："
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/btn_close" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
