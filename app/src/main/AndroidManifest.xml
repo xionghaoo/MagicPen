@@ -20,6 +20,7 @@
         android:theme="@style/Theme.MagicPen">
         <activity
             android:name=".ble.BleBluetoothActivity"
+            android:screenOrientation="userLandscape"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

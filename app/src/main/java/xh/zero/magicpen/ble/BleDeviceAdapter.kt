@@ -12,13 +12,17 @@ class BleDeviceAdapter(
     val items: ArrayList<BluetoothDevice>,
     private val onItemClick: (device: BluetoothDevice) -> Unit
 ) : PlainListAdapter<BluetoothDevice>(items) {
+
+    private val itemSet = HashSet<BluetoothDevice>()
+
     override fun itemLayoutId(): Int = R.layout.list_item_ble_device
 
     override fun bindView(v: View, item: BluetoothDevice, position: Int) {
         val tv = v.findViewById<TextView>(R.id.tv_ble_info)
-        if (item.address == Configs.DEVICE_MAC_ADDRESS) {
-            tv.text = "${item.name} - ${item.address}"
-        }
+//        if (item.address == Configs.DEVICE_MAC_ADDRESS) {
+//            tv.text = "${item.name} - ${item.address}"
+//        }
+        tv.text = "${item.name} - ${item.address}"
 
         v.findViewById<Button>(R.id.btn_connect).setOnClickListener {
             onItemClick(item)
@@ -26,7 +30,9 @@ class BleDeviceAdapter(
     }
 
     fun addDevice(device: BluetoothDevice) {
-        items.add(device)
+        itemSet.add(device)
+        items.clear()
+        items.addAll(itemSet)
         notifyDataSetChanged()
     }
 }

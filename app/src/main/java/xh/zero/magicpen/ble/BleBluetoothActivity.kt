@@ -57,7 +57,15 @@ class BleBluetoothActivity : AppCompatActivity() {
     private val leScanCallback = BluetoothAdapter.LeScanCallback { device, rssi, scanRecord ->
         runOnUiThread {
             // 扫描结果
-            if (device.address == Configs.DEVICE_MAC_ADDRESS) {
+//            if (device.address == Configs.DEVICE_MAC_ADDRESS) {
+//                binding.tvStatus.text = "状态：发现设备 ${device.address}"
+//                bleDeviceAdapter.addDevice(device)
+//            }
+            if (device.name != null) {
+                Log.d(TAG, "发现设备: ${device.address}, ${device.name}")
+            }
+
+            if (device.name != null) {
                 binding.tvStatus.text = "状态：发现设备 ${device.address}"
                 bleDeviceAdapter.addDevice(device)
             }
@@ -273,6 +281,7 @@ class BleBluetoothActivity : AppCompatActivity() {
             binding.tvConnectedDevice.text = "${device.name} - ${device.address}"
             binding.btnConnectedDevice.visibility = View.VISIBLE
             binding.btnConnectedDevice.setOnClickListener {
+                binding.tvStatus.text = "状态：正在连接设备。。。"
                 bluetoothGatt = device.connectGatt(this, false, gattCallback, TRANSPORT_LE)
             }
         }
@@ -408,8 +417,9 @@ class BleBluetoothActivity : AppCompatActivity() {
         bluetoothGatt = null
         binding.tvGestureMode.text = "手势模式：已关闭"
         binding.tvGestureNotify.text = "手势通知：已关闭"
-        binding.vDrawResult.clear()
+//        binding.vDrawResult.clear()
 
+        binding.tvStatus.text = "状态："
         binding.tvResult.text = "识别结果"
     }
 
