@@ -1,11 +1,14 @@
 package xh.zero.magicpen
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Path
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -14,9 +17,16 @@ import org.opencv.android.OpenCVLoader
 import org.opencv.android.Utils
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.EasyPermissions
 import xh.zero.magicpen.ble.BleBluetoothActivity
 import xh.zero.magicpen.databinding.ActivityMainBinding
+import java.io.File
+import java.io.FileWriter
+import java.io.FilterWriter
 import java.io.IOException
+import java.lang.Exception
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -24,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
+        private const val REQ_STORAGE_CODE = 5
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -34,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     private var resultBitmap: Bitmap? = null
     private lateinit var contours2f: MatOfPoint2f
     private lateinit var approxCurve: MatOfPoint2f
+    private var currentSaveFileName: String? = null
+    private var saveFileDir: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +62,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.drawView.setOnDrawListener(object : DrawView.OnDrawListener {
+            override fun onTouchStart(x: Float, y: Float) {
+                binding.tvCoordinate.text = "x: $x, y: $y"
+                currentSaveFileName = "${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}.txt"
+                saveCoordinate(x, y, currentSaveFileName!!)
+                binding.tvFileLocation.text = "本次绘制坐标保存位置: $saveFileDir"
+            }
+
+            override fun onTouchMove(x: Float, y: Float) {
+                binding.tvCoordinate.text = "x: $x, y: $y"
+                saveCoordinate(x, y, currentSaveFileName!!)
+            }
+
             override fun onCompleted(path: Path) {
                 binding.drawViewBg.setPath(path)
                 val bitmap = loadBitmapFromView(binding.drawViewBg)
@@ -58,6 +83,55 @@ class MainActivity : AppCompatActivity() {
         })
 
         binding.drawViewFixed.setOnTouchListener { v, event -> true }
+
+        requestPermissionTask()
+    }
+
+    private fun saveCoordinate(x: Float, y: Float, fileName: String) {
+        if (hasStoragePermission()) {
+            val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "magic_pen")
+            if (!dir.exists()) {
+                dir.mkdir()
+            }
+            val record = File(dir, fileName)
+            saveFileDir = record.absolutePath
+            try {
+                val writer = FileWriter(record, true)
+                writer.appendLine("x: $x, y: $y")
+                writer.flush()
+                writer.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    @AfterPermissionGranted(REQ_STORAGE_CODE)
+    private fun requestPermissionTask() {
+        if (hasStoragePermission()) {
+
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                "App需要存储权限",
+                REQ_STORAGE_CODE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        }
+    }
+
+    private fun hasStoragePermission(): Boolean {
+        return EasyPermissions.hasPermissions(this, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
     private fun loadBitmapFromView(v: View): Bitmap? {

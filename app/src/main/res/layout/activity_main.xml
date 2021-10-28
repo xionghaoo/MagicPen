@@ -13,10 +13,10 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-        android:text="Tensorflow测试"
+        android:text="陀螺仪版本"
+        android:layout_marginEnd="30dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
@@ -44,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/shape_draw_bg"/>
+
     </FrameLayout>
 
     <xh.zero.magicpen.DrawView
@@ -104,6 +105,26 @@
         android:layout_margin="5dp"
         app:layout_constraintBottom_toTopOf="@+id/draw_view_fixed"
         app:layout_constraintStart_toStartOf="@+id/draw_view_fixed" />
+
+    <TextView
+        android:id="@+id/tv_coordinate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="x: 0, y: 0"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/draw_view_container"
+        app:layout_constraintTop_toTopOf="@+id/draw_view_container" />
+
+    <TextView
+        android:id="@+id/tv_file_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="本次绘制坐标保存位置："
+        android:layout_marginEnd="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_open_cv_test"
+        app:layout_constraintEnd_toStartOf="@+id/btn_open_cv_test"
+        app:layout_constraintTop_toTopOf="@+id/btn_open_cv_test" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -117,6 +117,7 @@ class DrawView : View {
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                listener?.onTouchStart(touchX, touchY)
                 isTouchDraw = true
                 path.reset()
                 path.moveTo(touchX, touchY)
@@ -125,6 +126,7 @@ class DrawView : View {
                 invalidate()
             }
             MotionEvent.ACTION_MOVE -> {
+                listener?.onTouchMove(touchX, touchY)
                 path.lineTo(touchX, touchY)
                 invalidate()
             }
@@ -299,6 +301,8 @@ class DrawView : View {
     }
 
     interface OnDrawListener {
+        fun onTouchStart(x: Float, y: Float)
+        fun onTouchMove(x: Float, y: Float)
         fun onCompleted(path: Path)
     }
 }
